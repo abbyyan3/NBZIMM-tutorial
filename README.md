@@ -16,8 +16,7 @@ library(BhGLM)
 
 ## Usage
 ```r
-glmm(ixed, random, data, family, correlation, weights, 
-    control)
+glmm(ixed, random, data, family, correlation, weights, control)
 ```
 ## Arguments
 
