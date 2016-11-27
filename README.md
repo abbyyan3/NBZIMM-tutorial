@@ -11,7 +11,7 @@ The statistical details of the model are as below:
 ## Installation
 You can install our BhGLM package by downloading BhGLM_1.1.0.zip
 ```r
-install.packages("./BhGLM")
+install.packages("BhGLM")
 library(BhGLM)
 ```
 
