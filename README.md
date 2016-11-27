@@ -15,6 +15,14 @@ library(BhGLM)
 ```
 
 ## Usage
+```r
+glmm(ixed, random, data, family, correlation, weights, 
+    control)
+```
+## Arguments
+
+- **fixed, random, data, correlation, weights, control**: These arguments are the same as in lme from R package 'nlme'.  	   
+- **family**: For negative Binomial Mixed Model, the value is "nb'. 
 
 ## Examples
 
