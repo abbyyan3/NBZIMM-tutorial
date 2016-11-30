@@ -267,9 +267,11 @@ x = tapply(result$log10p, result$names, function(x) max(x))
 x = sort(x, TRUE)
 result$Species = factor(as.character(result$names), levels=names(x))
 result$level = "Species"
-p <- ggplot(result, aes(x=log10p, y=Species, color=Method)) + geom_point(size=4) +
-     theme(legend.position = "none") + theme(axis.text.x = element_text(angle = 0, hjust = 0, vjust=0.5)) +
-     xlab(expression('-log'[10]*'(P)')) + theme(text = element_text(size=20)) + facet_grid(. ~ level) + coord_fixed()
+p <- ggplot(result, aes(x=log10p, y=Species, color=Method)) + 
+     geom_point(size=4) + theme(legend.position = "none") + 
+     theme(axis.text.x = element_text(angle = 0, hjust = 0, vjust=0.5)) +
+     xlab(expression('-log'[10]*'(P)')) + theme(text = element_text(size=20)) +
+     facet_grid(. ~ level) + coord_fixed()
 p
 ```
 
