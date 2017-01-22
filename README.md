@@ -9,7 +9,7 @@ The statistical details of the model are as below:
 <img src="image/NBMM.PNG" width="600" align="center">
 
 ## Installation
-You can install our BhGLM package by downloading BhGLM_1.1.0.zip
+You can install our BhGLM package by downloading BhGLM_1.1.0.zip or BhGLM_1.1.0.tar.gz.
 ```r
 install.packages("BhGLM")
 library(BhGLM)
