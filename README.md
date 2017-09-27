@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Recent advances in next-generation sequencing (NGS) technology enable researchers to collect a large volume of metagenomic sequencing data. These data provide valuable resources for investigating interactions between the microbiome and host environmental/clinical factors. In addition to the well-known properties of microbiome count measurements, for example, varied total sequence reads across samples, over-dispersion and zero-inflation, microbiome studies usually collect samples with hierarchical structures, which introduce correlation among the samples and thus further complicate the analysis and interpretation of microbiome count data. We propose negative binomial mixed models (NBMMs) for detecting the association between the microbiome and host environmental/clinical factors for correlated microbiome count data. The proposed mixed-effects models incorporate random effects into the commonly used fixed-effects negative binomial model to account for correlation among the samples. 
+The complex microbiome is inherently dynamic. The metagenomics sequencing data provide valuable resources for investigating the dynamic changes of microbial abundance over time and the associations between the microbiome and host environmental/clinical factors. The well-known properties of microbiome measurements include varied total sequence reads across samples, over-dispersion and zero-inflation. Additionally, microbiome studies usually collect samples longitudinally, which insert correlation among the samples and thus further complicate the analysis and interpretation of microbiome count data. In this article, we implement our proposed Negative Binomial mixed models (NBMMs) for detecting the association between the microbiome and host environmental/clinical factors for longitudinal microbiome data.
 
 The statistical details of the model are as below:
 
@@ -24,255 +24,241 @@ glmm(fixed, random, data, family, correlation, weights, control)
 - **fixed, random, data, correlation, weights, control**: These arguments are the same as in lme from R package 'nlme'.  	   
 - **family**: For negative Binomial Mixed Model, the value is "nb'. 
 
-## Examples
-
-We use the following simple example to show the use of NBMM.
-```r
-library(BhGLM)
-
-# parameter settings
-  n = 200    
-  n.dam = 20   
-  b0 = c(0.4, 0.55)
-  cor = c(0.5, 0.8)
-
-# data simulation
-  corr = runif(1, cor[1], cor[2])
-  x = sim.x(n = n, m = 2, corr = corr)
-  q = rep(1/n.dam, n.dam-1)
-  q = cumsum(q)
-  quantiles = quantile(x[,1], q)
-  dam = as.numeric( factor(cut(x[,1], breaks = c(-Inf, quantiles, Inf))) )   
-  quantiles = quantile(x[,2], 0.45)
-  diet = as.numeric( factor(cut(x[,2], breaks = c(-Inf, quantiles, Inf))) )
-  diet = diet - 1   
-  
-  da = rep(NA, n.dam)
-  sigma = runif(1, 0.5, 1)
-  for (j in 1:n.dam) da[j] = rnorm(1, 0, sigma)
-  mu0 = runif(n, 0.1, 3.5)
-  theta = runif(1, 0.1, 5) 
-  b = runif(1, b0[1], b0[2]) 
-  ys = sim.y(x = diet, mu = mu0 + da[dam], sigma = 1, coefs = b, p.neg = 0, nb.theta = theta) 
-  y0 = ys$y.nb
-  N = exp(mu0)
-
-# model fitting and summary
-  f = glmm(y0 ~ offset(log(N)) + diet, random = ~ 1 | dam, family = "nb", verbose = F) 
-  out = summary(f)
-  out
-```
-
 ## Simulation Studies
-The following R code is used for simulation studies in a manuscript in revision and the citation will added later.
+The following R code is used for simulation studies (Setting 1) in a manuscript and the citation will added later.
 
 ```r
-rm(list=ls())
+rm(list=ls(all=TRUE))
+ls()
 
 library(BhGLM)
 library(nlme)
+library(MASS)
+#library(lmtest)
 
-## parameter settings ###
-n = 200       # 400, 200
-n.dam = 20    # 40, 20
+### set number of individuals
+n_1 <- 50
+n_2 <- 100
+n_3 <- 150 #100 
 
-#b0 = c(0, 0)                    
-#b0 = c(0.2, 0.35)
-b0 = c(0.4, 0.55)
+n <- n_1
 
-#cor = c(-0.1, 0.1)      
-#cor = c(0.5, 0.8) 
-cor = c(-0.8, -0.5)
+### average intercept and slope
+b_2 = c(0.2, 0.35)
+b_3 = c(0.3, 0.8) 
+b_1 = c(0, 0)
 
-f1 = f2 = f3 = list()
-out1 = out2 = out3 = NULL
-v0 = v = vresi = NULL
-th0 = th = NULL
+b0 = b_1
+b1 = b_2
+
+##### number of obserations parameters
+m = 5
+n.t = n*m
+##### covariate matrix
+X = NA
+
+f1 = f2 = f3 = f4 = list()
+
 bb = NULL
 
-#### simulation ###
-n.sims = 5000 
+n.sims = 100
+out1 = out2 = out3 = out4 = out5 = matrix(NA, n.sims, 3)
+out6 = out7 = out8 = out9 = out10 = matrix(NA, n.sims, 3)
+
 start.time <- Sys.time()
+
 for (i in 1:n.sims){
-  
-  corr = runif(1, cor[1], cor[2])
-  x = sim.x(n = n, m = 2, corr = corr)
-  q = rep(1/n.dam, n.dam-1)
-  q = cumsum(q)
-  quantiles = quantile(x[,1], q)
-  dam = as.numeric( factor(cut(x[,1], breaks = c(-Inf, quantiles, Inf))) )   
-  quantiles = quantile(x[,2], 0.45)
-  diet = as.numeric( factor(cut(x[,2], breaks = c(-Inf, quantiles, Inf))) )
-  diet = diet - 1   
-  
-  da = rep(NA, n.dam)
-  sigma = runif(1, 0.5, 1); v0 = c(v0, sigma^2); sigma^2
-  for (j in 1:n.dam) da[j] = rnorm(1, 0, sigma)
-  logT = runif(n, 7.1, 10.5)
-  u = -7
-  mu0 = logT + u
-  theta = runif(1, 0.1, 5); th0 = c(th0, theta); theta
-  b = runif(1, b0[1], b0[2]); bb = c(bb, b); b
-  ys = sim.y(x = diet, mu = mu0 + da[dam], sigma = 1, coefs = b, p.neg = 0, nb.theta = theta) 
-  y0 = ys$y.nb
-  N = exp(logT)
-  
-  tryAgain = TRUE
-  infiniteloopcounter = 1
-  while (tryAgain & infiniteloopcounter < 5) {
-    y1 = asin(sqrt((y0)/(N)))
-    if (anyNA(y1) == TRUE) {
-      tryAgain = TRUE
-      infiniteloopcounter = infiniteloopcounter + 1
-    } else {
-      tryAgain = FALSE
-    }
-  }
-  if (infiniteloopcounter >= 5) {
-    stop("Consistent error found during simulation. Need to investigate cause.")
-  }
-  
-  y1 = y1/sd(y1)
-  f1 = glmm(y1 ~ diet, random = ~ 1 | dam, family = gaussian, verbose = F) 
-  out1 = rbind(out1, summary(f1)$tTable["diet", ][c(1,2,5)])
-  out1
-  
-  y2 = log((y0 + 1)/N)
-  y2 = y2/sd(y2)
-  f2 = glmm(y2 ~ diet, random = ~ 1 | dam, family = gaussian, verbose = F) 
-  out2 = rbind(out2, summary(f2)$tTable["diet", ][c(1,2,5)])
-  out2
-  
-  f3 = glmm(y0 ~ offset(log(N)) + diet, random = ~ 1 | dam, family = "nb", verbose = F) 
-  out3 = rbind(out3, summary(f3)$tTable["diet", ][c(1,2,5)])
-  out3
-  th = c(th, f3$nb.theta); th 
-  v = c(v, getVarCov(f3)); v
-  vresi = c(vresi, f3$sigma); vresi
+  tryCatch({
+    #set.seed(12345+i)
+    diet = c(rep(1, n/2*m), rep(0, n/2*m))   
+    id = c(rep(1:(n/2),m),rep((n/2+1):n,m))
+    U_1 = rep(NA, n)
+    sigma_1 = runif(1, 0.5, 1); #v0_1 = c(v0_1, sigma_1^2); sigma_1^2
+    for (k in 1:n) U_1[k] = rnorm(1, 0, sigma_1)
     
+    t = rep(log(1:m), each = n/2, times = 2)
+    
+    beta_1 = runif(1, b0[1], b0[2])
+    beta_2 = runif(1, b0[1], b0[2])
+    beta_3 = runif(1, b1[1], b1[2])
+    
+    inter = t*diet
+    
+    b.rep <- U_1[id]
+
+    logT = runif(n.t, 7.1, 10.5)
+    N = exp(logT)
+    u0 = -7
+    expmu0 = logT + u0 
+    mu0 = log(expmu0)
+    
+    log.u <- mu0 + diet*beta_1 + t*beta_2 + beta_3*inter + b.rep# #+b.rep#
+    u <- exp(log.u)
+    
+    nb.theta = runif(1, 0.1, 5)
+    Y1 = rnegbin(n.t, mu = u, theta = nb.theta)
+    Y = Y1
+    
+    X <- as.matrix(data.frame(id=id, t=t, diet=diet, y0=Y, N=N))
+    
+    ### set up data frame
+    dat <- data.frame(X)
+    
+    N = dat$N
+    y0 = dat$y0
+    diet = dat$diet
+    subject.ind = dat$id
+    time.ind = dat$t
+    
+    y1 = asin(sqrt((y0)/(N)))
+    
+    f1 = lme(y1 ~ diet*time.ind,  random = ~1|subject.ind) 
+    out1[i, ] = summary(f1)$tTable["diet:time.ind", ][c(1,2,5)]
+    out6[i, ] = summary(f1)$tTable["diet", ][c(1,2,5)]
+    
+    f4 = glmm(y0 ~ diet*time.ind + offset(log(N)), random = ~1|subject.ind, family = "nb", verbose = F) 
+    out5[i, ] = summary(f4)$tTable["diet:time.ind", ][c(1,2,5)]
+    out10[i, ] = summary(f4)$tTable["diet", ][c(1,2,5)]
+       
+  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+  
 }
 stop.time <- Sys.time()
 round(difftime(stop.time, start.time, units = "min"), 3)
 
-pow = cbind(out2[,3], out1[,3], out3[,3])
-est = out3[, 1]
-est = est - bb
-res = sim.out(coefs.p = t(pow), coefs.est = t(est), alpha = c(0.05, 0.01, 0.005, 0.001))
-rownames(res[[1]]) = c("LMM_arcsine", "LMM_log", "NBMM")
-res
 ```
 
 ## Real Data Analysis
-The following R code is used for real data analysis in a manuscript in revision and the citation will added later. The dataset we analyzed was published in Leamy, L.J., et al. Host genetics and diet, but not immunoglobulin A expression, converge to shape compositional features of the gut microbiome in an advanced intercross population of mice. Genome Biol 2014;15(12):552. 
+The following R code is used for real data analysis in a manuscript and the citation will added later.
 
 ```r
+library(phyloseq)
 library(BhGLM)
-setwd()
+library(nlme)
 
-pheno = read.csv("F10_Species_All.csv", header = T) ##or genus family order class phylum 
+setwd("C:/Users/xzhang/Google Drive/zigzinb/temporal real data/Analysis/")
 
-dim(pheno)
-colnames(pheno)
-rownames(pheno) = pheno[, 1]
+clinical <- read.csv("temporal spatial clinical merged.csv")
+otu <- read.csv("temporal spatial otu.csv", check.names = F)
+taxonomy <- read.csv("temporal spatial taxonomy.csv")
+clusters <- read.csv("clust.csv")
 
-yy = as.matrix(pheno[, 2:(ncol(pheno)-6)])
+clinical <- merge(clinical, clusters, by.x = "X", by.y = "X")
+########### otu data #################
+dim(otu)
+colnames(otu)
+rownames((otu))
+
+############### clinical data ############################
+dim(clinical)
+colnames(clinical)
+
+sites = clinical$BodySite  # four different body sites
+table(sites)
+
+# Samples collected before delivery
+Preg <- clinical$Preg
+table(sites, Preg)
+PrePreg <- clinical$PrePreg
+table(Preg, PrePreg)
+
+# Samples collected after delivery
+Post <- clinical$PostPreg
+
+#### keep only samples collected during pregnancy
+##### Keep only samples in vaginal swab ####
+clinical <- clinical[clinical$Outcome != "Marginal", ] ### Same as in the paper
+clinical <- clinical[clinical$V1 == "4", ] ### Same as in the paper
+
+clinical <- clinical[clinical$Preg == "TRUE", ]
+clinical <- clinical[clinical$BodySite == "Vaginal_Swab", ] ### To compare with CST analysis in the paper
+otu <- otu[otu$Sample_ID %in% clinical$SampleID, ]
+
+yy = as.matrix(otu[,-1])
 yy = ifelse(is.na(yy), 0, yy)
 zero.p = apply(yy, 2, function(x) {length(x[x != 0])/length(x)} )
 zero.p = sort(zero.p, decreasing = T)
 zero.p = data.frame(zero.p)
 zero.p$id = rownames(zero.p)
-zero.p = data.frame(zero.p[zero.p$zero.p>0.1, ])
+zero.p = data.frame(zero.p[zero.p$zero.p>0.25, ]) ## same as the proportion of non zero used in the paper for CST = 4
 yy = yy[, rownames(zero.p)]
+rownames(yy) = otu$Sample_ID
 
-diet = pheno[, "Diet"]
-table(diet)
-dam = pheno[, "DamID"]
-table(dam); length(table(dam))
-sire = pheno[, "SireID"]
-table(sire); length(table(sire))
-parity = pheno[, "Parity"]
-table(parity)
+sampleID = clinical$SampleID # different samples for one subject
+SubjectID = as.factor(clinical$SubjectID)
+outcome = clinical$Outcome # preterm vs term groups
+table(outcome)
+term_label = ifelse(outcome == "Term", 0, 1)
 
-N = pheno[, "TotalReads"]  # total reads
+weeks = as.numeric(log(clinical$GDColl)) # Days for samples collected
+summary(weeks)
+
+N = clinical$NumReads  # total reads
 mean(N); sd(N)
 mean(log(N)); sd(log(N))
 
 ##########################
-# NBMM model
+## LMM model
+### compare random intercept model with random slope (dropping the correlation between random intercept and slope) model
+f1 = f2 = f3 = f4 = f5 = f6 = f7 = f8 = list()
+out1 = out2 = out3 = out4 = out5 = out6 = out7 = out8 = out9 = out10 = out11 = out12 = matrix(NA, ncol(yy), 1)
 
-di = theta = p.adjust = NULL
 for (j in 1:ncol(yy)){
-  y = yy[, j]
-  f = glmm(y ~ diet + offset(log(N)), family = "nb", random = ~ 1 | dam)
-  res = summary(f)
-  di = c(di, res$tTable[nrow(res$tTable), 5])
-  theta = c(theta, res$nb.theta)
+  tryCatch({
+    y = yy[, j]
+    y0 = asin(sqrt(y/N))
+    f1 = lme(y0 ~ term_label, random = ~ 1|SubjectID)
+    out1[j, ] = summary(f1)$tTable[2, 5]
+    
+    f2 = lme(y0 ~ term_label, random = list(SubjectID = pdDiag(~weeks)))
+    out3[j, ] = summary(f2)$tTable[2, 5]
+    
+    f3 = lme(y0 ~ term_label*weeks, random = ~ 1|SubjectID)
+    out5[j, ] = summary(f3)$tTable[2, 5]
+    out7[j, ] = summary(f3)$tTable[4, 5]
+    
+    f4 = lme(y0 ~ term_label*weeks, random = list(SubjectID = pdDiag(~weeks)))
+    out9[j, ] = summary(f4)$tTable[2, 5]
+    out11[j, ] = summary(f4)$tTable[4, 5]
+    
+  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
-p.adjust <- as.vector(as.numeric(p.adjust(di, method = "fdr", n = length(di))))
-res1 = cbind(di, p.adjust)
-rownames(res1) = colnames(yy)
-result1 <- data.frame(res1)
-result1$Method <- "NBMM"
-result1$names <- rownames(result1)
-result1 <- result1[result1$p.adjust < 0.05, ]
+out_lmm <- cbind(out1, out3, out5, out7, out9, out11)
 
-# LMM arcsine model
-di = p.adjust = NULL
+##########################
+## NBMM model
+### compare random intercept model with random slope (dropping the correlation between random intercept and slope) model
 for (j in 1:ncol(yy)){
-  y = yy[, j]
-  y0 = asin(sqrt(y/N))
-  f = glmm(y0 ~ diet, family = "gaussian", random = ~ 1 | dam)
-  res = summary(f)
-  di = c(di, res$tTable[nrow(res$tTable), 5])
+  tryCatch({
+    y = as.numeric(yy[, j])
+    #y0 = log2(y + 1)#asin(sqrt(y/N))
+    f5 = glmm(y ~ term_label + offset(log(N)), family = "nb", random = ~ 1|SubjectID)
+    out2[j, ] = summary(f5)$tTable[2, 5]
+    
+    f6 = glmm(y ~ term_label + offset(log(N)), family = "nb", random = list(SubjectID = pdDiag(~weeks)))
+    out4[j, ] = summary(f6)$tTable[2, 5]
+    
+    f7 = glmm(y ~ term_label*weeks + offset(log(N)), family = "nb", random = ~ 1|SubjectID)
+    out6[j, ] = summary(f7)$tTable[2, 5]
+    out8[j, ] = summary(f7)$tTable[4, 5]
+    
+    f8 = glmm(y ~ term_label*weeks + offset(log(N)), family = "nb", random = list(SubjectID = pdDiag(~weeks)))
+    out10[j, ] = summary(f8)$tTable[2, 5]
+    out12[j, ] = summary(f8)$tTable[4, 5]
+    
+    
+  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
-p.adjust <- as.vector(as.numeric(p.adjust(di, method = "fdr", n = length(di))))
-res2 = cbind(di, p.adjust)
-rownames(res2) = colnames(yy)
-result2 <- data.frame(res2)
-result2$Method <- "LMM_arcsine"
-result2$names <- rownames(result2)
-result2 <- result2[result2$p.adjust < 0.05, ]
+out_nbmm <- cbind(out2, out4, out6, out8, out10, out12)
 
-# LMM log model
-di = p.adjust = NULL
-for (j in 1:ncol(yy)){
-  y = yy[, j]
-  y0 = log((y + 1)/N)
-  f = glmm(y0 ~ diet, family = "gaussian", random = ~ 1 | dam)
-  res = summary(f)
-  di = c(di, res$tTable[nrow(res$tTable), 5])
-}
-p.adjust <- as.vector(as.numeric(p.adjust(di, method = "fdr", n = length(di))))
-res3 = cbind(di, p.adjust)
-rownames(res3) = colnames(yy)
-result3 <- data.frame(res3)
-result3$Method <- "LMM_log"
-result3$names <- rownames(result3)
-result3 <- result3[result3$p.adjust < 0.05, ]
-
-result <- rbind(result1, result2)
-result$log10p <- -log10(result$p.adjust)
-#colnames(result)[8] <- "-log10(p)"
-
-### generate the plot for manuscript ###
-library("ggplot2")
-theme_set(theme_bw())
-scale_fill_discrete <- function(palname = "Set1", ...) {
-  scale_fill_brewer(palette = palname, ...)
-}
-x = tapply(result$log10p, result$Method, function(x) max(x))
-x = sort(x, TRUE)
-result$Method = factor(as.character(result$Method), levels=names(x))
-x = tapply(result$log10p, result$names, function(x) max(x))
-x = sort(x, TRUE)
-result$Species = factor(as.character(result$names), levels=names(x))
-result$level = "Species"
-p <- ggplot(result, aes(x=log10p, y=Species, color=Method)) + 
-     geom_point(size=4) + theme(legend.position = "none") + 
-     theme(axis.text.x = element_text(angle = 0, hjust = 0, vjust=0.5)) +
-     xlab(expression('-log'[10]*'(P)')) + theme(text = element_text(size=20)) +
-     facet_grid(. ~ level) + coord_fixed()
-p
+out <- cbind(out1, out2, out3,  out4, out5, out6, out7, out8, out9, out10, out11, out12)
+rownames(out) = colnames(yy)
+est = out2[complete.cases(out2), 1]
+est = est
+res = sim.out(coefs.p = t(out), coefs.est = t(est), alpha = c(0.05, 0.01, 0.005, 0.001))
+res
+res2 = sim.out(coefs.p = t(p.adjust), coefs.est = t(est), alpha = c(0.05, 0.01, 0.005, 0.001))
+res2
 ```
 
 ## Contact
