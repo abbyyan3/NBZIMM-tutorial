@@ -8,9 +8,9 @@ repo: "https://github.com/evanwill/go-go-ghpages"
 
 # urls
 # your gh-pages url: https://username.github.io
-url: https://abbyyan3.github.io/BhGLM-tutorial/
+url: https://abbyyan3.github.io/
 # your repository name: /repository
-baseurl: /bhglm_tutorial
+baseurl: /BhGLM-tutorial
 
 # defaults (to simplify front matter)
 defaults:
