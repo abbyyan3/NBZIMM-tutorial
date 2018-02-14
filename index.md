@@ -10,11 +10,14 @@ The BhGLM package is actively and openly developed on GitHub:
 
 (https://github.com/abbyyan3/BhGLM/)
 
-### License: GPL
-<div class="toc" markdown="1">
-## Contents:
+## The following links are some example codes used for manuscripts with BhGLM:
 
 {% for lesson in site.pages %}
 {% if lesson.nav == true %}- [{{ lesson.title }}]({{ lesson.url | absolute_url }}){% endif %}
 {% endfor %}
 </div>
+
+### Author: Nengjun Yi <nyi@uab.edu>
+### Maintainer: Nengjun Yi <nyi@uab.edu>
+### License: GPL
+<div class="toc" markdown="1">
