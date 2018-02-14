@@ -1,3 +1,8 @@
+---
+title: BhGLM NBMMs Longitudinal
+nav: true
+---
+
 # BhGLM - NBMM (Negative Binomial Mixed Model)
 
 ## Introduction
