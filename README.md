@@ -1,18 +1,9 @@
-# go-go-ghpages
+# BhGLM: Bayesian hierarchical GLMs and survival models, with application to Genetics and Epidemiology 
 
-An intro workshop about GitHub Pages and Jekyll. 
+Description: Functions for setting up and fitting various Bayesian hierarchical models, for numerically and graphically summarizing the fitted models, and for evaluating the predictive performance. The functions can be used to analyze not only general data but also large-scale genomic data (i.e., genetic association analysis, predictive and prognostic modeling of diseases and traits).
+       
+# The BhGLM package is actively and openly developed on GitHub: 
 
-https://evanwill.github.io/go-go-ghpages/
+[GitHub pages](https://github.com/abbyyan3/BhGLM/)
 
-# Build a Website with Jekyll and GitHub Pages 
-
-With [GitHub pages](https://pages.github.com/) and [Jekyll](https://jekyllrb.com/) you can quickly create and publish a website for free! 
-It is an ideal solution for creating a simple project or personal site to highlight your academic work. 
-
-This workshop will introduce the basics of using the popular static website generator Jekyll integrated with GitHub pages. 
-You will learn how to set up a project repository, write content in Markdown, and publish your site, all using GitHub's user friendly web interface. 
-Advanced usage of Jekyll for local web development is introduced final section.
-
-### Hosted at [University of Idaho Library](http://www.lib.uidaho.edu/) April 2017
-
-> licensed [cc-by-sa](https://creativecommons.org/licenses/by-sa/4.0/) <a href="https://github.com/evanwill">evan will</a> 2017
+### License: GPL
