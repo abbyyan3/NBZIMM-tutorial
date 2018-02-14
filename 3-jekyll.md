@@ -96,8 +96,6 @@ If you put any file in the same place as the theme's structure, your version wil
 
 Thanks Octocat!
 
-{% include figure.html file="octocat.jpg" alt="github octocat" width="45%" %}
 
-> If you want to collaborate on the blog, add other GitHub users in the *Settings* tab. Look for *Collaborators* on the left side menu.
-> You can keep track of the project using the *Issues* or *Projects* features.
-> For information about using different themes, check the [Reference page]({{ "/5-reference.html" | absolute_url }}).
+
+
