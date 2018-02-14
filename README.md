@@ -7,3 +7,5 @@ The BhGLM package is actively and openly developed on GitHub:
 (https://github.com/abbyyan3/BhGLM/)
 
 License: GPL
+
+This is the repository for the BhGLM Tutorial: https://abbyyan3.github.io/BhGLM-tutorial/
