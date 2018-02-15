@@ -22,12 +22,14 @@ library(BhGLM)
 
 ## Usage
 ```r
-glmm(fixed, random, data, family, correlation, weights, control)
+glmm.nb(fixed, random, data, subset, correlation, weights, control, niter = 30, epsilon = 1e-05, verbose = TRUE)
 ```
 ## Arguments
 
-- **fixed, random, data, correlation, weights, control**: These arguments are the same as in lme from R package 'nlme'.  	   
-- **family**: For negative Binomial Mixed Model, the value is "nb'. 
+- **fixed, random, data, subset, correlation, weights, control**: These arguments are the same as in the function lme in the package nlme.
+- **niter**: maximum number of iterations.
+- **epsilon**: positive convergence tolerance.
+- **verbose**: logical. If TRUE, print out number of iterations and computational time.
 
 ## Simulation Studies
 The following R code is used for simulation studies (Setting 1) in a manuscript and the citation will added later.
@@ -121,7 +123,7 @@ for (i in 1:n.sims){
     out1[i, ] = summary(f1)$tTable["diet:time.ind", ][c(1,2,5)]
     out6[i, ] = summary(f1)$tTable["diet", ][c(1,2,5)]
     
-    f4 = glmm(y0 ~ diet*time.ind + offset(log(N)), random = ~1|subject.ind, family = "nb", verbose = F) 
+    f4 = glmm.nb(y0 ~ diet*time.ind + offset(log(N)), random = ~1|subject.ind, verbose = F) 
     out5[i, ] = summary(f4)$tTable["diet:time.ind", ][c(1,2,5)]
     out10[i, ] = summary(f4)$tTable["diet", ][c(1,2,5)]
        
@@ -237,17 +239,17 @@ for (j in 1:ncol(yy)){
   tryCatch({
     y = as.numeric(yy[, j])
     #y0 = log2(y + 1)#asin(sqrt(y/N))
-    f5 = glmm(y ~ term_label + offset(log(N)), family = "nb", random = ~ 1|SubjectID)
+    f5 = glmm.nb(y ~ term_label + offset(log(N)), random = ~ 1|SubjectID)
     out2[j, ] = summary(f5)$tTable[2, 5]
     
-    f6 = glmm(y ~ term_label + offset(log(N)), family = "nb", random = list(SubjectID = pdDiag(~weeks)))
+    f6 = glmm.nb(y ~ term_label + offset(log(N)), random = list(SubjectID = pdDiag(~weeks)))
     out4[j, ] = summary(f6)$tTable[2, 5]
     
-    f7 = glmm(y ~ term_label*weeks + offset(log(N)), family = "nb", random = ~ 1|SubjectID)
+    f7 = glmm.nb(y ~ term_label*weeks + offset(log(N)), random = ~ 1|SubjectID)
     out6[j, ] = summary(f7)$tTable[2, 5]
     out8[j, ] = summary(f7)$tTable[4, 5]
     
-    f8 = glmm(y ~ term_label*weeks + offset(log(N)), family = "nb", random = list(SubjectID = pdDiag(~weeks)))
+    f8 = glmm.nb(y ~ term_label*weeks + offset(log(N)), random = list(SubjectID = pdDiag(~weeks)))
     out10[j, ] = summary(f8)$tTable[2, 5]
     out12[j, ] = summary(f8)$tTable[4, 5]
     
