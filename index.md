@@ -18,6 +18,7 @@ The BhGLM package is actively and openly developed on GitHub:
 {% endfor %}
 </div>
 
-### Author and Maintainer: Nengjun Yi <nyi@uab.edu>
+### Author: Nengjun Yi <nyi@uab.edu>
+### Maintainer: Nengjun Yi <nyi@uab.edu>; Xinyan Zhang <xzhang@georgiasouthern.edu>
 ### License: GPL
 
