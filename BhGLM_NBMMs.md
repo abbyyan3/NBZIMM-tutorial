@@ -22,12 +22,14 @@ library(BhGLM)
 
 ## Usage
 ```r
-glmm(fixed, random, data, family, correlation, weights, control)
+glmm.nb(fixed, random, data, subset, correlation, weights, control, niter = 30, epsilon = 1e-05, verbose = TRUE)
 ```
 ## Arguments
 
-- **fixed, random, data, correlation, weights, control**: These arguments are the same as in lme from R package 'nlme'.  	   
-- **family**: For negative Binomial Mixed Model, the value is "nb'. 
+- **fixed, random, data, subset, correlation, weights, control**: These arguments are the same as in the function lme in the package nlme.
+- **niter**: maximum number of iterations.
+- **epsilon**: positive convergence tolerance.
+- **verbose**: logical. If TRUE, print out number of iterations and computational time.
 
 ## Examples
 
@@ -63,7 +65,7 @@ library(BhGLM)
   N = exp(mu0)
 
 # model fitting and summary
-  f = glmm(y0 ~ offset(log(N)) + diet, random = ~ 1 | dam, family = "nb", verbose = F) 
+  f = glmm.nb(y0 ~ offset(log(N)) + diet, random = ~ 1 | dam, verbose = F) 
   out = summary(f)
   out
 ```
@@ -138,17 +140,17 @@ for (i in 1:n.sims){
   }
   
   y1 = y1/sd(y1)
-  f1 = glmm(y1 ~ diet, random = ~ 1 | dam, family = gaussian, verbose = F) 
+  f1 = lme(y1 ~ diet, random = ~ 1 | dam, verbose = F) 
   out1 = rbind(out1, summary(f1)$tTable["diet", ][c(1,2,5)])
   out1
   
   y2 = log((y0 + 1)/N)
   y2 = y2/sd(y2)
-  f2 = glmm(y2 ~ diet, random = ~ 1 | dam, family = gaussian, verbose = F) 
+  f2 = lme(y2 ~ diet, random = ~ 1 | dam, verbose = F) 
   out2 = rbind(out2, summary(f2)$tTable["diet", ][c(1,2,5)])
   out2
   
-  f3 = glmm(y0 ~ offset(log(N)) + diet, random = ~ 1 | dam, family = "nb", verbose = F) 
+  f3 = glmm.nb(y0 ~ offset(log(N)) + diet, random = ~ 1 | dam, family = "nb", verbose = F) 
   out3 = rbind(out3, summary(f3)$tTable["diet", ][c(1,2,5)])
   out3
   th = c(th, f3$nb.theta); th 
@@ -208,7 +210,7 @@ mean(log(N)); sd(log(N))
 di = theta = p.adjust = NULL
 for (j in 1:ncol(yy)){
   y = yy[, j]
-  f = glmm(y ~ diet + offset(log(N)), family = "nb", random = ~ 1 | dam)
+  f = glmm.nb(y ~ diet + offset(log(N)), random = ~ 1 | dam)
   res = summary(f)
   di = c(di, res$tTable[nrow(res$tTable), 5])
   theta = c(theta, res$nb.theta)
@@ -226,7 +228,7 @@ di = p.adjust = NULL
 for (j in 1:ncol(yy)){
   y = yy[, j]
   y0 = asin(sqrt(y/N))
-  f = glmm(y0 ~ diet, family = "gaussian", random = ~ 1 | dam)
+  f = lme(y0 ~ diet, random = ~ 1 | dam)
   res = summary(f)
   di = c(di, res$tTable[nrow(res$tTable), 5])
 }
@@ -243,7 +245,7 @@ di = p.adjust = NULL
 for (j in 1:ncol(yy)){
   y = yy[, j]
   y0 = log((y + 1)/N)
-  f = glmm(y0 ~ diet, family = "gaussian", random = ~ 1 | dam)
+  f = lme(y0 ~ diet, random = ~ 1 | dam)
   res = summary(f)
   di = c(di, res$tTable[nrow(res$tTable), 5])
 }
