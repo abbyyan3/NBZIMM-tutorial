@@ -8,7 +8,7 @@ This package provides functions for setting up and fitting various Bayesian hier
        
 The BhGLM package is actively and openly developed on GitHub: 
 
-https://github.com/abbyyan3/BhGLM/
+<https://github.com/abbyyan3/BhGLM/>
 
 <div class="toc" markdown="1">
 ## The following links are some example codes used for manuscripts with BhGLM:
