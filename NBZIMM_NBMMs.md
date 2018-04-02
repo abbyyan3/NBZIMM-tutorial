@@ -6,7 +6,7 @@ nav: true
 # NBZIMM - NBMM (Negative Binomial Mixed Model)
 
 ## Installation
-You can install our BhGLM package by downloading BhGLM_1.1.0.zip or BhGLM_1.1.0.tar.gz.
+You can install our NBZIMM package by downloading NBZIMM_1.0.zip.
 ```r
 install.packages("NBZIMM")
 library(NBZIMM)
