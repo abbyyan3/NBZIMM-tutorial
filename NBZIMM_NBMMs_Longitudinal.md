@@ -134,7 +134,7 @@ round(difftime(stop.time, start.time, units = "min"), 3)
 ## Real Data Analysis
 The following R code is used for real data analysis in a manuscript and the citation will added later.
 
-You can find the datasets: https://github.com/abbyyan3/NBZIMM-tutorial/tree/master/NBMM-longitudinal-temporal-data
+You can find the datasets: https://github.com/abbyyan3/NBZIMM-tutorial/tree/master/NBMM-longitudinal-temporal-data/
 
 ```r
 library(phyloseq)
