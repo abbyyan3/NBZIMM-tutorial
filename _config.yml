@@ -1,7 +1,7 @@
 # site settings
-title: BhGLM Tutorial
+title: NBZIMM Tutorial
 description: > 
-  Learn about use of BhGLM. 
+  Learn about use of NBZIMM. 
 
 # add the full url for the github repository
 repo: "https://github.com/evanwill/go-go-ghpages"
@@ -10,7 +10,7 @@ repo: "https://github.com/evanwill/go-go-ghpages"
 # your gh-pages url: https://username.github.io
 url: https://abbyyan3.github.io/
 # your repository name: /repository
-baseurl: /BhGLM-tutorial
+baseurl: /NBZIMM-tutorial
 
 # defaults (to simplify front matter)
 defaults:
