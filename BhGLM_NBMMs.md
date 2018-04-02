@@ -1,23 +1,15 @@
 ---
-title: BhGLM NBMMs
+title: NBZIMM NBMMs
 nav: true
 ---
 
-# BhGLM - NBMM (Negative Binomial Mixed Model)
-
-## Introduction
-
-Recent advances in next-generation sequencing (NGS) technology enable researchers to collect a large volume of metagenomic sequencing data. These data provide valuable resources for investigating interactions between the microbiome and host environmental/clinical factors. In addition to the well-known properties of microbiome count measurements, for example, varied total sequence reads across samples, over-dispersion and zero-inflation, microbiome studies usually collect samples with hierarchical structures, which introduce correlation among the samples and thus further complicate the analysis and interpretation of microbiome count data. We propose negative binomial mixed models (NBMMs) for detecting the association between the microbiome and host environmental/clinical factors for correlated microbiome count data. The proposed mixed-effects models incorporate random effects into the commonly used fixed-effects negative binomial model to account for correlation among the samples. 
-
-The statistical details of the model are as below:
-
-<img src="image/NBMM.PNG" width="600" align="center">
+# NBZIMM - NBMM (Negative Binomial Mixed Model)
 
 ## Installation
 You can install our BhGLM package by downloading BhGLM_1.1.0.zip or BhGLM_1.1.0.tar.gz.
 ```r
-install.packages("BhGLM")
-library(BhGLM)
+install.packages("NBZIMM")
+library(NBZIMM)
 ```
 
 ## Usage
@@ -35,7 +27,7 @@ glmm.nb(fixed, random, data, subset, correlation, weights, control, niter = 30, 
 
 We use the following simple example to show the use of NBMM.
 ```r
-library(BhGLM)
+library(NBZIMM)
 
 # parameter settings
   n = 200    
@@ -76,6 +68,7 @@ The following R code is used for simulation studies in a manuscript in revision 
 ```r
 rm(list=ls())
 
+library(MBZIMM)
 library(BhGLM)
 library(nlme)
 
@@ -173,7 +166,7 @@ res
 The following R code is used for real data analysis in a manuscript in revision and the citation will added later. The dataset we analyzed was published in Leamy, L.J., et al. Host genetics and diet, but not immunoglobulin A expression, converge to shape compositional features of the gut microbiome in an advanced intercross population of mice. Genome Biol 2014;15(12):552. 
 
 ```r
-library(BhGLM)
+library(NBZIMM)
 setwd()
 
 pheno = read.csv("F10_Species_All.csv", header = T) ##or genus family order class phylum 
