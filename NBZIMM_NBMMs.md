@@ -68,7 +68,7 @@ The following R code is used for simulation studies in a manuscript in revision 
 ```r
 rm(list=ls())
 
-library(MBZIMM)
+library(NBZIMM)
 library(BhGLM)
 library(nlme)
 
