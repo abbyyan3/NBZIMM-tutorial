@@ -7,7 +7,7 @@ nav: true
 
 ## Introduction
 
-This function sets up and fits zero-inflated (gaussian, negative binomial, and Poisson) mixed models for analyzing zero-inflated continuous or count responses with multilevel data structures (for example, clustered data and longitudinal studies).
+This function sets up and fits zero-inflated gaussian mixed models for analyzing zero-inflated continuous or count responses with multilevel data structures (for example, clustered data and longitudinal studies).
 
 ## Installation
 You can install our NBZIMM package by downloading NBZIMM_1.0.zip.
@@ -18,7 +18,7 @@ library(NBZIMM)
 
 ## Usage
 ```r
-glmm.zi(fixed, random, data, family = c("zig", "zinb", "zip"), 
+lme.zig(fixed, random, data, 
         zi.random = FALSE, correlation, niter = 30, epsilon = 1e-05, 
         verbose = TRUE, ...) 
 ```
@@ -26,7 +26,6 @@ glmm.zi(fixed, random, data, family = c("zig", "zinb", "zip"),
 
 - **fixed**: symbolic description of the fixed-effects part of the model, see details.
 - **random, data, subset, correlation**: These arguments are the same as in the function lme in the package nlme.
-- **family**: character specification of zero-inflated model family: zero-inflated Gaussian (normal) ("zig"), zero-inflated negative binomial ("zinb"), and zero-inflated Poisson ("zip").
 - **zi.random**: logical. If TRUE, include the random effect specified by random in the zero-inflation part.
 - **niter**: maximum number of iterations.
 - **epsilon**: positive convergence tolerance.
@@ -110,7 +109,7 @@ for (i in 1:n.sims){
     
     y1 = log2((y0 + 1))
     y1 = y1/sd(y1)
-    f2 = NBZIMM::glmm.zi(y1 ~ x |offset(off), zi.random = T, random = ~ 1 | ind, family = "zig", verbose = F) 
+    f2 = lme.zig(y1 ~ x |offset(off), zi.random = T, random = ~ 1 | ind, verbose = F) 
     out4[i, ] = summary(f2)$tTable[2, c(1,2,5)]
     
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
@@ -217,17 +216,17 @@ for (j in 1:ncol(yy)){
   tryCatch({
     y = as.numeric(yy[, j])
     y1 = log2(y + 1)#asin(sqrt(y/N))
-    f5 = glmm.zi(y1 ~ group + weeks + offset(log(N)), family = "zig", random = ~ 1|subject)
+    f5 = lme.zig(y1 ~ group + weeks + offset(log(N)), random = ~ 1|subject)
     out2[j, ] = summary(f5)$tTable[2, 5]
     
-    f6 = glmm.zi(y1 ~ group + weeks + offset(log(N)), family = "zig", random = list(subject = pdDiag(~weeks)))
+    f6 = lme.zig(y1 ~ group + weeks + offset(log(N)), random = list(subject = pdDiag(~weeks)))
     out4[j, ] = summary(f6)$tTable[2, 5]
     
-    f7 = glmm.zi(y1 ~ group*weeks + offset(log(N)), family = "zig", random = ~ 1|subject)
+    f7 = lme.zig(y1 ~ group*weeks + offset(log(N)), random = ~ 1|subject)
     out6[j, ] = summary(f7)$tTable[2, 5]
     out8[j, ] = summary(f7)$tTable[4, 5]
     
-    f8 = glmm.zi(y1 ~ group*weeks + offset(log(N)), family = "zig", random = list(subject = pdDiag(~weeks)))
+    f8 = lme.zig(y1 ~ group*weeks + offset(log(N)), random = list(subject = pdDiag(~weeks)))
     out10[j, ] = summary(f8)$tTable[2, 5]
     out12[j, ] = summary(f8)$tTable[4, 5]
     
@@ -314,17 +313,17 @@ for (j in 1:ncol(yy)){
   tryCatch({
     y = as.numeric(yy[, j])
     y1 = log2(y + 1)#asin(sqrt(y/N))
-    f5 = glmm.zi(y1 ~ mode + offset(log(N)), family = "zig", random = ~ 1|subject)
+    f5 = lme.zig(y1 ~ mode + offset(log(N)), random = ~ 1|subject)
     out2[j, ] = summary(f5)$tTable[2, 5]
     
-    f6 = glmm.zi(y1 ~ mode + offset(log(N)), family = "zig", random = list(subject = pdDiag(~time)))
+    f6 = lme.zig(y1 ~ mode + offset(log(N)), random = list(subject = pdDiag(~time)))
     out4[j, ] = summary(f6)$tTable[2, 5]
     
-    f7 = glmm.zi(y1 ~ mode + time + mode:time + offset(log(N)), family = "zig", random = ~ 1|subject)
+    f7 = lme.zig(y1 ~ mode + time + mode:time + offset(log(N)), random = ~ 1|subject)
     out6[j, ] = summary(f7)$tTable[2, 5]
     out8[j, ] = summary(f7)$tTable[4, 5]
     
-    f8 = glmm.zi(y1 ~ mode + time + mode:time + offset(log(N)), family = "zig", random = list(subject = pdDiag(~time)))
+    f8 = lme.zig(y1 ~ mode + time + mode:time + offset(log(N)), random = list(subject = pdDiag(~time)))
     out10[j, ] = summary(f8)$tTable[2, 5]
     out12[j, ] = summary(f8)$tTable[4, 5]
     
