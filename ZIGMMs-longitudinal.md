@@ -160,13 +160,6 @@ weeks = ifelse(clinical$group == 0, clinical$GA_Days, clinical$GA_Days/7)
 
 pheno = otu
 
-pheno <- pheno[, c(4, 7, 11, 16, 17, 18, 21, 22, 23, 26, 27, 30, 31, 33, 34, 35, 36, 41, 42, 49, 51,
-                    52, 54, 55, 57, 58, 59, 60, 61, 63, 64, 65, 66, 67, 78, 80, 81, 83, 86, 89, 94, 95,
-                    96, 101, 103, 104, 106, 107, 114, 124, 127)] # genus
-#pheno <- pheno[, -c(4, 7, 11, 16, 17, 18, 21, 22, 23, 26, 27, 30, 31, 33, 34, 35, 36, 41, 42, 49, 51,
-#                    52, 54, 55, 57, 58, 59, 60, 61, 63, 64, 65, 66, 67, 78, 80, 81, 83, 86, 89, 94, 95,
-#                    96, 101, 103, 104, 106, 107, 114, 124, 127)] # species
-
 pheno = pheno[rownames(clinical), ]
 dim(pheno)
 colnames(pheno)
@@ -190,19 +183,19 @@ for (j in 1:ncol(yy)){
   tryCatch({
     y = yy[, j]
     y0 = asin(sqrt(y/N))
-    f1 = lme(y0 ~ group+ weeks, random = ~ 1|subject)
+    f1 = lme(y0 ~ group+ weeks + age + race, random = ~ 1|subject)
     out1[j, ] = summary(f1)$tTable[2, 5]
     
-    f2 = lme(y0 ~ group+ weeks, random = list(subject = pdDiag(~weeks)))
+    f2 = lme(y0 ~ group+ weeks + age + race, random = list(subject = pdDiag(~weeks)))
     out3[j, ] = summary(f2)$tTable[2, 5]
     
-    f3 = lme(y0 ~ group*weeks, random = ~ 1|subject)
+    f3 = lme(y0 ~ group*weeks  + age + race, random = ~ 1|subject)
     out5[j, ] = summary(f3)$tTable[2, 5]
-    out7[j, ] = summary(f3)$tTable[4, 5]
+    out7[j, ] = summary(f3)$tTable[6, 5]
     
-    f4 = lme(y0 ~ group*weeks, random = list(subject = pdDiag(~weeks)))
+    f4 = lme(y0 ~ group*weeks  + age + race, random = list(subject = pdDiag(~weeks)))
     out9[j, ] = summary(f4)$tTable[2, 5]
-    out11[j, ] = summary(f4)$tTable[4, 5]
+    out11[j, ] = summary(f4)$tTable[6, 5]
     
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
@@ -216,116 +209,19 @@ for (j in 1:ncol(yy)){
   tryCatch({
     y = as.numeric(yy[, j])
     y1 = log2(y + 1)#asin(sqrt(y/N))
-    f5 = lme.zig(y1 ~ group + weeks + offset(log(N)), random = ~ 1|subject)
+    f5 = glmm.zi(y1 ~ group + weeks  + age + race + offset(log(N)), family = "zig", random = ~ 1|subject)
     out2[j, ] = summary(f5)$tTable[2, 5]
     
-    f6 = lme.zig(y1 ~ group + weeks + offset(log(N)), random = list(subject = pdDiag(~weeks)))
+    f6 = glmm.zi(y1 ~ group + weeks  + age + race + offset(log(N)), family = "zig", random = list(subject = pdDiag(~weeks)))
     out4[j, ] = summary(f6)$tTable[2, 5]
     
-    f7 = lme.zig(y1 ~ group*weeks + offset(log(N)), random = ~ 1|subject)
+    f7 = glmm.zi(y1 ~ group*weeks  + age + race + offset(log(N)), family = "zig", random = ~ 1|subject)
     out6[j, ] = summary(f7)$tTable[2, 5]
-    out8[j, ] = summary(f7)$tTable[4, 5]
+    out8[j, ] = summary(f7)$tTable[6, 5]
     
-    f8 = lme.zig(y1 ~ group*weeks + offset(log(N)), random = list(subject = pdDiag(~weeks)))
+    f8 = glmm.zi(y1 ~ group*weeks  + age + race + offset(log(N)), family = "zig", random = list(subject = pdDiag(~weeks)))
     out10[j, ] = summary(f8)$tTable[2, 5]
-    out12[j, ] = summary(f8)$tTable[4, 5]
-    
-    
-  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
-}
-out_zigmm <- cbind(out2, out4, out6, out8, out10, out12)
-
-```
-The LaRosa's DATASET
-```r
-data(LaRosa) ## data included in R package NBZIMM
-pheno = LaRosa$OTU; dim(otu)
-clinical = LaRosa$SampleData; dim(clinical)
-dim(pheno)
-colnames(pheno)
-
-yy = as.matrix(pheno[, 13:(ncol(pheno))])  # for class
-yy = ifelse(is.na(yy), 0, yy)
-zero.p = apply(yy, 2, function(x) {length(x[x != 0])/length(x)} )
-zero.p = sort(zero.p, decreasing = T)
-zero.p = data.frame(zero.p)
-zero.p$id = rownames(zero.p)
-zero.p = data.frame(zero.p[zero.p$zero.p>0.1, ])
-yy = yy[, rownames(zero.p)]
-
-room = clinical[, "Room.category"]
-subject = clinical[, "Subject"]
-time = clinical[, "Day.of.life.sample.obtained"]
-birthweeks = clinical[, "Gestational.age.at.birth...weeks"]
-gender = clinical[, "gender"]
-mode = clinical[, "mode.of.birth"]
-period = clinical[, "Period.of.study"]
-milk = clinical[, "milk"]
-antibiotics = clinical[, "days.of.antibiotics"]
-
-table(room); length(table(room))
-table(subject); 
-summary(time)
-summary(birthweeks)
-table(gender)
-table(mode)
-table(period)
-table(milk)
-summary(antibiotics)
-
-N = rowSums(yy)  # total reads
-mean(N); sd(N)
-mean(log(N)); sd(log(N))
-
-##########################
-## LMM model
-### compare random intercept model with random slope (dropping the correlation between random intercept and slope) model
-f1 = f2 = f3 = f4 = f5 = f6 = f7 = f8 = list()
-out1 = out2 = out3 = out4 = out5 = out6 = out7 = out8 = out9 = out10 = out11 = out12 = matrix(NA, ncol(yy), 1)
-
-for (j in 1:ncol(yy)){
-  tryCatch({
-    y = yy[, j]
-    y0 = asin(sqrt(y/N))
-    f1 = lme(y0 ~ mode, random = ~ 1|subject)
-    out1[j, ] = summary(f1)$tTable[2, 5]
-    
-    f2 = lme(y0 ~ mode, random = list(subject = pdDiag(~time)))
-    out3[j, ] = summary(f2)$tTable[2, 5]
-    
-    f3 = lme(y0 ~ mode + time + mode:time, random = ~ 1|subject)
-    out5[j, ] = summary(f3)$tTable[2, 5]
-    out7[j, ] = summary(f3)$tTable[4, 5]
-    
-    f4 = lme(y0 ~ mode + time + mode:time, random = list(subject = pdDiag(~time)))
-    out9[j, ] = summary(f4)$tTable[2, 5]
-    out11[j, ] = summary(f4)$tTable[4, 5]
-    
-  }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
-}
-out_lmm <- cbind(out1, out3, out5, out7, out9, out11)
-
-##########################
-## ZIGMM model
-### compare random intercept model with random slope (dropping the correlation between random intercept and slope) model
-#di = matrix(NA, ncol(yy), 3)
-for (j in 1:ncol(yy)){
-  tryCatch({
-    y = as.numeric(yy[, j])
-    y1 = log2(y + 1)#asin(sqrt(y/N))
-    f5 = lme.zig(y1 ~ mode + offset(log(N)), random = ~ 1|subject)
-    out2[j, ] = summary(f5)$tTable[2, 5]
-    
-    f6 = lme.zig(y1 ~ mode + offset(log(N)), random = list(subject = pdDiag(~time)))
-    out4[j, ] = summary(f6)$tTable[2, 5]
-    
-    f7 = lme.zig(y1 ~ mode + time + mode:time + offset(log(N)), random = ~ 1|subject)
-    out6[j, ] = summary(f7)$tTable[2, 5]
-    out8[j, ] = summary(f7)$tTable[4, 5]
-    
-    f8 = lme.zig(y1 ~ mode + time + mode:time + offset(log(N)), random = list(subject = pdDiag(~time)))
-    out10[j, ] = summary(f8)$tTable[2, 5]
-    out12[j, ] = summary(f8)$tTable[4, 5]
+    out12[j, ] = summary(f8)$tTable[6, 5]
     
     
   }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
